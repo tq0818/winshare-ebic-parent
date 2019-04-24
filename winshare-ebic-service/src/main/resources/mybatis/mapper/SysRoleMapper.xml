@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.SysRoleMapper" >
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.SysRole" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="role_name" property="roleName" jdbcType="VARCHAR" />
+  	<result column="role_iden" property="roleIden" jdbcType="VARCHAR" />
+  	<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	<result column="status" property="status" jdbcType="TINYINT" />
+ </resultMap>
+  
+  <select id="getById" resultMap="BaseResultMap">
+	  	select a.id, a.role_name, a.role_iden, a.remarks,a.create_time, a.modify_time,a.status
+	   	from tb_sys_role a
+		<where>
+			a.id = #{id}
+		</where>
+  </select>
+  
+ 
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.SysRole" resultMap="BaseResultMap">
+	  	select a.id, a.role_name, a.role_iden, a.remarks,a.create_time, a.modify_time,a.status
+		from tb_sys_role a
+		<where>
+		   	<if test="roleName != null and roleName != ''">and a.role_name like concat('%',#{roleName},'%')</if>
+			<if test="roleIden != null and roleIden != ''">and a.role_iden = #{roleIden}</if>
+			<if test="status != null">and a.status = #{status}</if>
+		</where>
+		order by a.modify_time desc
+  </select>
+  
+  
+  
+  <insert id="save"  parameterType="com.winshare.edu.modules.system.entity.SysRole" useGeneratedKeys="true" keyProperty="id">
+  	INSERT INTO tb_sys_role (role_name, role_iden, remarks,  create_time, modify_time,status) 
+  	 select  #{roleName}, #{roleIden}, #{remarks}, now(), now(),1 from (select count(id) countNum from tb_sys_role where role_iden =#{roleIden} or role_name = #{roleName} having countNum = 0) a2   
+  </insert>
+  
+  <update id="update" parameterType="com.winshare.edu.modules.system.entity.SysRole">
+	UPDATE tb_sys_role
+	<set>
+		role_name = #{roleName},
+		role_iden = #{roleIden},
+		remarks= #{remarks},
+		modify_time = now(),
+		status = #{status}
+	</set>
+	<where>
+		id = #{id} and (select s2.countNum from (select count(s.id) countNum from tb_sys_role s where (role_name = #{roleName} or role_iden = #{roleIden}) and id != #{id}) s2) = 0
+	</where>
+  </update>
+  
+  <delete id="delete">
+  	DELETE FROM tb_sys_role where id = #{id} and (select count(id) from tb_r_user_role where role_id = #{id}) = 0
+  </delete>
+  
+    <insert id="saveAuthorizeRole" parameterType="java.util.Map">
+     insert into tb_r_role_menu(role_id,menu_id) select #{roleId},#{menuId} from (select count(id) countNum from tb_r_role_menu where role_id =#{roleId} and menu_id = #{menuId} having countNum = 0) a2 
+  </insert>
+  
+  <delete id="deleteRoleAuthorize" parameterType="long">
+      delete from tb_r_role_menu where role_id = #{roleId}
+  </delete>
+  
+  <select id="findMenuIdListByRoleId" parameterType="long" resultType="long">
+    select menu_id from tb_r_role_menu where role_id = #{roleId};
+  </select>
+  
+  <select id="findRoleIdListByAccountId" parameterType="long" resultType="long" >
+   select  a.role_id from tb_r_user_role a ,tb_sys_role r where a.account_id = #{accountId} and a.role_id = r.id and r.status = 1
+  </select>
+  
+<update id="batchUpdateStatus" parameterType="java.util.Map">
+  update tb_sys_role set status = #{status} where id in 
+   <foreach collection="roleIdList" index="index" item="roleId" open="(" separator="," close=")">
+                #{roleId}       
+  </foreach>    
+
+</update>
+  
+  
+<insert id="saveUserRoleRelation" parameterType="map">
+  insert into tb_r_user_role(account_id,role_id) values
+  <foreach collection="roleIdList" item="roleId"  separator =",">
+    (#{accountId},#{roleId})
+  </foreach>
+
+</insert>  
+  
+<delete id="delRelationByAccountId" parameterType="long">
+   delete from tb_r_user_role where account_id = #{accountId}
+</delete>
+  
+  <select id="countByNameIden" parameterType="com.winshare.edu.modules.system.entity.SysRole" resultType="int">
+     select count(id) from tb_sys_role 
+     <where>
+       <if test="roleName !=null and roleName !='' "> role_name = #{roleName} </if>
+       <if test="roleIden !=null and roleIden !='' "> and role_iden = #{roleIden} </if>
+       <if test="id != null"> and id != #{id} </if>
+     </where>
+  </select>
+  
+  <select id="findRoleListByAccountId" parameterType="long" resultMap="BaseResultMap" >
+   select  r.id,r.role_name,r.role_iden from tb_r_user_role  a ,tb_sys_role r  where a.account_id = #{accountId}  and a.role_id = r.id and r.status = 1
+  </select>
+  
+</mapper>

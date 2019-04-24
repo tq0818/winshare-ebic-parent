@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.SysLogMapper" >
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.SysLog" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="account" property="account" jdbcType="VARCHAR" />
+  	<result column="user_name" property="userName" jdbcType="VARCHAR" />
+  	<result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	<result column="org_id" property="orgId" jdbcType="BIGINT" />
+ </resultMap>
+ 
+  
+ 
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.SysLog" resultMap="BaseResultMap">
+	  	select a.id, a.user_name, a.account, a.org_name,a.create_time, a.modify_time
+		from tb_sys_log a
+		<where>
+		    <if test="account != null and account != ''"> and a.account like concat('%',#{account},'%')</if>
+		   	<if test="userName != null and userName != ''"> and a.user_name like concat('%',#{userName},'%')</if>
+			<if test="orgId != null "> and a.org_id = #{orgId}</if>
+			<if test="startTime !=null and startTime !='' "> and a.create_time  >= #{startTime} </if>
+		    <if test="endTime != null and endTime !='' "> and  a.create_time  &lt;= #{endTime}  </if>
+		</where>
+	  order by a.create_time desc
+  </select>
+  
+  
+  <insert id="save" parameterType="com.winshare.edu.modules.system.entity.SysLog" keyProperty="id" useGeneratedKeys="true">
+     insert into tb_sys_log(account,user_name,org_name,create_time,modify_time,org_id) values(#{account},#{userName},#{orgName},now(),now(),#{orgId})
+  </insert>
+ 
+  
+</mapper>

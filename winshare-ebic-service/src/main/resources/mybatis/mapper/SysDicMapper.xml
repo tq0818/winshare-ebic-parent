@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.SysDicMapper" >
+
+  <sql id="table">tb_sys_dic</sql>
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.SysDic" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="parent_ids" property="parentIds" jdbcType="VARCHAR" />
+  	<result column="dic_name" property="dicName" jdbcType="VARCHAR" />
+  	<result column="dic_code" property="dicCode" jdbcType="VARCHAR" />
+  	<result column="dic_value" property="typeValue" jdbcType="VARCHAR" />
+	<result column="dic_name" property="typeName" jdbcType="VARCHAR" />
+	<result column="dic_code" property="typeCode" jdbcType="VARCHAR" />
+	<result column="dic_value" property="dicValue" jdbcType="VARCHAR" />
+  	<result column="dic_sort" property="dicSort" jdbcType="INTEGER" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  	<association property="parent" javaType="com.winshare.edu.modules.system.entity.SysDic">
+  		<id column="parent_id" property="id" jdbcType="BIGINT" />
+  		<result column="parent_name" property="dicName" jdbcType="VARCHAR" />
+  	</association>
+  </resultMap>
+
+
+	<resultMap id="SysDicResultMap" type="com.winshare.edu.modules.system.entity.SysDic" >
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="dic_value" property="typeValue" jdbcType="VARCHAR" />
+		<result column="dic_name" property="typeName" jdbcType="VARCHAR" />
+		<result column="dic_code" property="typeCode" jdbcType="VARCHAR" />
+	</resultMap>
+  	
+  <select id="findAll" resultMap="BaseResultMap">
+  	select a.id, a.parent_id, a.parent_ids, a.dic_name, a.dic_code, a.dic_value, a.dic_sort,
+  	       b.dic_name as parent_name
+	from tb_sys_dic a LEFT JOIN tb_sys_dic b ON b.id = a.parent_id
+  </select>
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.SysDic" resultMap="BaseResultMap">
+  	select a.id, a.parent_id, a.parent_ids, a.dic_name, a.dic_code, a.dic_value, a.dic_sort,a.create_time,a.modify_time,
+  	       b.dic_name as parent_name
+	from tb_sys_dic a LEFT JOIN tb_sys_dic b ON b.id = a.parent_id
+	<where>
+		<if test="dicName != null and dicName != ''">and a.dic_name like concat('%',#{dicName},'%')</if>
+		<if test="dicCode != null and dicCode != ''">and a.dic_code like concat(#{dicCode},'%')</if>
+		<if test="parentIds != null and parentIds != ''">and a.parent_ids like concat(#{parentIds},'%')</if>
+	</where>
+  </select>
+
+	<select id="findLists" parameterType="com.winshare.edu.modules.system.entity.SysDic" resultMap="BaseResultMap">
+		select a.id, a.parent_id, a.parent_ids, a.dic_name, a.dic_code, a.dic_value, a.dic_sort,a.create_time,a.modify_time
+		from tb_sys_dic a
+		<where>
+			<if test="parentIds != null and parentIds != ''">and a.parent_id =#{parentIds}</if>
+			<if test="dicCode != null and dicCode != ''">and a.dic_code like concat(#{dicCode},'%')</if>
+		</where>
+	</select>
+  
+  <select id="get" resultMap="BaseResultMap">
+  	select a.id, a.parent_id, a.parent_ids, a.dic_name, a.dic_code, a.dic_value, a.dic_sort,a.create_time,a.modify_time,
+  	       b.dic_name as parent_name
+	from tb_sys_dic a LEFT JOIN tb_sys_dic b ON b.id = a.parent_id
+	<where>
+		a.id = #{id}
+	</where>
+  </select>
+  
+  <select id="getByExample" parameterType="com.winshare.edu.modules.system.entity.SysDic" resultMap="BaseResultMap">
+  	select a.id, a.parent_id, a.parent_ids, a.dic_name, a.dic_code, a.dic_value, a.dic_sort,a.create_time,a.modify_time,
+  	       b.dic_name as parent_name
+	from tb_sys_dic a LEFT JOIN tb_sys_dic b ON b.id = a.parent_id
+	<where>
+		<if test="id != null and id != ''">and a.id = #{id}</if>
+		<if test="dicCode != null and dicCode != ''">and a.dic_code = #{dicCode}</if>
+	</where>
+	limit 1
+  </select>
+  
+  <insert id="save"  parameterType="com.winshare.edu.modules.system.entity.SysDic" useGeneratedKeys="true" keyProperty="id">
+  	INSERT INTO tb_sys_dic (parent_id, parent_ids, dic_name, dic_code, dic_value, dic_sort, create_time, modify_time) 
+  					VALUES (#{parentId}, #{parentIds}, #{dicName}, #{dicCode}, #{dicValue}, #{dicSort}, now(), now());
+  </insert>
+  
+  <update id="update">
+	UPDATE tb_sys_dic
+	<set>
+		dic_name = #{dicName},
+		dic_code = #{dicCode},
+		dic_value = #{dicValue},
+		dic_sort = #{dicSort},
+		modify_time = now()
+	</set>
+	<where>
+		id = #{id}
+	</where> 		
+  </update>
+  
+  <delete id="delete">
+  	DELETE FROM tb_sys_dic where id = #{id}
+  </delete>
+
+
+	<select id="findTypeByCode" parameterType="map" resultType="com.winshare.edu.common.entity.SysDicVo">
+		select a.dic_name typeName, a.dic_code typeCode, a.dic_value typeValue
+		from tb_sys_dic a
+		<where>
+			<if test="dicCode != null and dicCode != ''">and a.dic_code like concat(#{dicCode},'%')</if>
+		</where>
+	</select>
+</mapper>

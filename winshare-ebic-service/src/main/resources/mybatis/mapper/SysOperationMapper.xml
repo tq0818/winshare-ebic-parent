@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.SysOperationMapper" >
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.SysOperation" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="menu_id" property="menuId" jdbcType="BIGINT" />
+  	<result column="role_rela_id" property="roleRelaId" jdbcType="BIGINT" />
+  	<result column="operation_name" property="operationName" jdbcType="VARCHAR" />
+  	<result column="operation_iden" property="operationIden" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="findOperationByMenuId" resultMap="BaseResultMap">
+	  	select id,menu_id,operation_name,operation_iden from tb_sys_operation where menu_id = #{param1}
+  </select>
+  
+  
+  <select id="findAll" resultMap="BaseResultMap" parameterType="long">
+	  	select o.id,o.menu_id,o.operation_name,o.operation_iden,r.id role_rela_id from tb_sys_operation o left join tb_sys_r_role_operation r on r.role_id = #{param1} and o.id  = r.operation_id
+  </select>
+  
+  <delete id="deleteOperRelaByRoleId">
+       delete from tb_sys_r_role_operation where role_id = #{param1} 
+  </delete>
+  
+  <insert id="saveOperRela" parameterType="map">
+      insert into tb_sys_r_role_operation(role_id,operation_id) select #{roleId},#{operationId} from dual where (select ro2.countNum from (select  count(ro.id) countNum from tb_sys_r_role_operation ro where ro.role_id = #{roleId} and ro.operation_id = #{operationId} ) ro2 ) = 0;
+     
+  </insert>
+  
+  <select id="findOperationByAccountId" resultMap="BaseResultMap" parameterType="long">
+	  	select o.id,o.menu_id,o.operation_name,o.operation_iden from tb_sys_operation o,tb_sys_r_role_operation r, tb_r_user_role u where u.account_id = #{accountId}  and u.role_id =  r.role_id  and r.operation_id = o.id
+  </select>
+  
+ </mapper>

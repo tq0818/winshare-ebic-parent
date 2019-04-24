@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.classes.mapper.ClassGroupMapper" >
+
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.classes.entity.ClassGroup" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="class_id" property="classId" jdbcType="BIGINT" />
+  	<result column="teacher_id" property="teacherId" jdbcType="BIGINT" />
+  	<result column="leader_id" property="leaderId" jdbcType="BIGINT" />
+  	<result column="grade" property="grade" jdbcType="VARCHAR" />
+  	<result column="subject" property="subject" jdbcType="VARCHAR" />
+  	<result column="group_name" property="groupName" jdbcType="VARCHAR" />
+  	<result column="group_score" property="groupScore" jdbcType="BIGINT" />
+  	<result column="is_status" property="isStatus" jdbcType="VARCHAR" />
+	<result column="student" property="student" jdbcType="VARCHAR" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+	<sql id="table_columns">
+		class_id,
+		teacher_id,
+		leader_id,
+		grade,
+		subject,
+		group_name,
+		group_score,
+		is_status,
+	  create_time,
+	  modify_time
+	</sql>
+
+	<sql id="entity_properties">
+		#{classId},
+		#{teacherId},
+		#{leaderId},
+		#{grade},
+		#{subject},
+		#{groupName},
+		#{groupScore},
+		#{isStatus},
+		#{createTime},
+		#{modifyTime}
+	</sql>
+
+	<update id="delete" parameterType="long">
+		UPDATE tb_class_group set is_status = 1 where id = #{id}
+	</update>
+
+	<insert id="insert" parameterType="com.winshare.edu.modules.classes.entity.ClassGroup" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_class_group( <include refid="table_columns" /> )
+		values ( <include refid="entity_properties" /> )
+	</insert>
+
+	<update id="update" parameterType="com.winshare.edu.modules.classes.entity.ClassGroup">
+		update tb_class_group
+		<trim prefix="set" suffixOverrides=",">
+			<if test="classId != null and classId != ''">class_id = #{classId},</if>
+			<if test="teacherId != null and teacherId != ''">teacher_id = #{teacherId},</if>
+			<if test="leaderId != null and leaderId != ''">leader_id = #{leaderId},</if>
+			<if test="grade != null and grade != ''">grade = #{grade},</if>
+			<if test="subject != null and subject != ''">subject = #{subject},</if>
+			<if test="groupName != null and groupName != ''">group_name = #{groupName},</if>
+			<if test="groupScore != null and groupScore != ''">group_score = #{groupScore},</if>
+		</trim>
+		<where>id = #{id}</where>
+	</update>
+
+	<select id="getClassGroup" resultMap="BaseResultMap" parameterType="com.winshare.edu.modules.classes.entity.ClassGroup">
+		select cg.class_id,cg.leader_id,cg.group_name,cg.group_score,GROUP_CONCAT(rcs.student_id) student,cg.teacher_id teacherId,cg.grade,cg.subject from
+		tb_class_group cg
+		LEFT JOIN tb_r_group_student rcs on cg.id = rcs.group_id
+		where 1=1 and cg.is_status = '0'
+		<if test="id != null and id != ''">and cg.id =#{id}</if>
+		<if test="classId != null and classId != ''">and cg.class_id =#{classId}</if>
+		<if test="teacherId != null and teacherId != ''">and cg.teacher_id =#{teacherId}</if>
+		<if test="grade != null and grade != ''">and cg.grade =#{grade}</if>
+		<if test="subject != null and subject != ''">and cg.subject =#{subject}</if>
+		GROUP BY cg.id
+	</select>
+
+	<select id="findScoreCount" parameterType="long" resultType="String">
+		select ifnull(group_score,0) from tb_class_group where id = #{id}
+	</select>
+
+</mapper>

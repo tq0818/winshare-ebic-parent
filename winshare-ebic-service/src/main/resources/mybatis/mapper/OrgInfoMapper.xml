@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.OrgInfoMapper" >
+
+  <sql id="table">tb_org_info</sql>
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.OrgInfo" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="parent_ids" property="parentIds" jdbcType="VARCHAR" />
+  	<result column="org_name" property="orgName" jdbcType="VARCHAR" />
+  	<result column="org_code" property="orgCode" jdbcType="VARCHAR" />
+  	<result column="org_number" property="orgNumber" jdbcType="VARCHAR" />
+  	<result column="org_level" property="orgLevel" jdbcType="VARCHAR" />
+  	<result column="org_contact" property="orgContact" jdbcType="VARCHAR" />
+  	<result column="org_phone" property="orgPhone" jdbcType="VARCHAR" />
+  	<result column="org_email" property="orgEmail" jdbcType="VARCHAR" />
+  	<result column="address" property="address" jdbcType="VARCHAR" />
+  	<result column="org_status" property="orgStatus" jdbcType="VARCHAR" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	<result column="area_id" property="areaId" jdbcType="BIGINT" />
+  	<association property="parent" javaType="com.winshare.edu.modules.system.entity.OrgInfo">
+  		<id column="parent_id" property="id" jdbcType="BIGINT" />
+  		<result column="parent_name" property="orgName" jdbcType="VARCHAR" />
+  	</association>
+   
+  	
+  </resultMap>
+  
+  <select id="getById" resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.org_name, a.org_code, a.org_number, a.org_level, a.org_contact,
+	  	       a.org_phone, a.org_email, a.address,a.org_status, a.create_time, a.modify_time,
+	  	       b.org_name as parent_name,a.area_id
+		from tb_org_info a LEFT JOIN tb_org_info b ON b.id = a.parent_id
+		<where>
+			a.id = #{id}
+		</where>
+  </select>
+  
+  <select id="getByExample" parameterType="com.winshare.edu.modules.system.entity.OrgInfo"  resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.org_name, a.org_code, a.org_number, a.org_level, a.org_contact,
+	  	       a.org_phone, a.org_email, a.address,a.org_status, a.create_time, a.modify_time,
+	  	       b.org_name as parent_name,a.area_id
+		from tb_org_info a LEFT JOIN tb_org_info b ON b.id = a.parent_id
+		<where>
+			<if test="id != null and id != ''">and a.id = #{id}</if>
+			<if test="orgCode != null and orgCode != ''">and a.org_code = #{orgCode}</if>
+			<if test="orgNumber != null and orgNumber != ''">and a.org_number = #{orgNumber}</if>
+		</where>
+		limit 1 
+  </select>
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.OrgInfo" resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.org_name, a.org_code, a.org_number, a.org_level, a.org_contact,
+	  	       a.org_phone, a.org_email,  a.address,a.org_status, a.create_time, a.modify_time,
+	  	       b.org_name as parent_name,a.area_id
+		from tb_org_info a LEFT JOIN tb_org_info b ON b.id = a.parent_id
+		<where>
+			<if test="orgName != null and orgName != ''">and a.org_name like concat('%',#{orgName},'%')</if>
+			<if test="orgLevel != null and orgLevel != ''">and a.org_level like concat (#{orgLevel},'%')</if>
+			<if test="orgStatus != null and orgStatus != ''">and a.org_status = #{orgStatus}</if>
+			<if test="parentIds != null and parentIds != ''">and a.parent_ids like concat(#{parentIds},'%')</if>
+		    <if test="boundedOrgLevel != null and boundedOrgLevel != ''"> and a.org_level  in (select dic_code from tb_sys_dic d where d.dic_value   &lt;=  (select d2.dic_value from tb_sys_dic d2 where    d2.dic_code = 'org_level_city') and d.dic_code like 'org_level%')</if>
+		</where>
+		order by a.modify_time desc
+  </select>
+  
+  
+  <select id="findListChildren" parameterType="com.winshare.edu.modules.system.entity.OrgInfo" resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.org_name, a.org_code, a.org_number, a.org_level, a.org_contact,
+	  	       a.org_phone, a.org_email,  a.address,a.org_status, a.create_time, a.modify_time,
+	  	       b.org_name as parent_name,a.area_id
+		from tb_org_info a LEFT JOIN tb_org_info b ON b.id = a.parent_id
+		<where>
+			<if test="orgName != null and orgName != ''">and a.org_name like concat('%',#{orgName},'%')</if>
+			<if test="orgLevel != null and orgLevel != ''">and a.org_level = #{orgLevel}</if>
+			<if test="orgStatus != null and orgStatus != ''">and a.org_status = #{orgStatus}</if>
+			<if test="parent != null and parent.id != ''">and a.parent_id =#{parent.id}</if>
+			<if test="parentIds != null and parentIds != ''">and a.parent_ids like concat(#{parentIds},'%')</if>
+			<if test="id != null">or a.id =#{id}</if>
+		</where>
+		order by a.modify_time desc
+  </select>
+  
+  
+  <select id="findTreeInfo" parameterType="com.winshare.edu.modules.system.entity.TreeInfo" resultType="com.winshare.edu.modules.system.entity.TreeInfo">
+	  	SELECT
+			a.id id,
+			a.parent_id parentId,
+			a.parent_ids parentIds,
+			a.org_name orgName,
+			0 isClass
+		FROM
+			tb_org_info a
+		LEFT JOIN tb_org_info b ON b.id = a.parent_id
+		<where>
+			<if test="orgName != null and orgName != ''">and a.org_name like concat('%',#{orgName},'%')</if>
+			<!-- <if test="orgLevel != null and orgLevel != ''">and a.org_level = #{orgLevel}</if>
+			<if test="orgStatus != null and orgStatus != ''">and a.org_status = #{orgStatus}</if> -->
+			<if test="parentIds != null and parentIds != ''">and a.parent_ids like concat(#{parentIds},'%')</if>
+		</where>
+  </select>
+  
+  
+  <insert id="save"  parameterType="com.winshare.edu.modules.system.entity.OrgInfo" useGeneratedKeys="true" keyProperty="id">
+  	INSERT INTO tb_org_info (parent_id, parent_ids, org_name, org_code, org_number, org_level, org_contact, org_phone, org_email,  address, org_status, create_time, modify_time,area_id)
+  	       VALUES (#{parentId}, #{parentIds}, #{orgName}, #{orgCode}, (select concat(left('000',3-length(max(o2.id) + 1)),max(o2.id) + 1) from tb_org_info o2), #{orgLevel}, #{orgContact}, #{orgPhone}, #{orgEmail}, #{address}, #{orgStatus}, now(), now(),#{areaId});
+  </insert>
+  
+  <update id="update" parameterType="com.winshare.edu.modules.system.entity.OrgInfo">
+	UPDATE tb_org_info
+	<set>
+		org_name = #{orgName},
+		org_code= #{orgCode},
+		org_number = #{orgNumber},
+		org_level = #{orgLevel},
+		org_contact = #{orgContact},
+		org_phone = #{orgPhone},
+		org_email = #{orgEmail},
+		address = #{address},	
+		org_status = #{orgStatus},
+		modify_time = now(),
+		area_id = #{areaId}
+	</set>
+	<where>
+		id = #{id} and  (select o2.countNum from (select count(o.id) countNum from tb_org_info o where  o.org_code= #{orgCode} and o.id != #{id}) o2) = 0
+	</where>
+  </update>
+  
+  <delete id="delete">
+  	DELETE FROM tb_org_info where id = #{id} and (select o2.countNum from (select count(o.id) countNum from tb_org_info o where o.parent_id = #{id}) o2) = 0 and (select o3.countNum from (select count(org.id) countNum from tb_org_info org,tb_class_info c where (org.id = #{id} or org.parent_id = #{id}) and org.id = c.org_id) o3) = 0
+  </delete>
+  
+  <update id="updateStatus" parameterType="map">
+     update tb_org_info set org_status = #{status} where id in
+      <foreach collection="idList" index="index" item="id" open="(" separator="," close=")">
+                #{id}       
+      </foreach>
+  </update>
+</mapper>

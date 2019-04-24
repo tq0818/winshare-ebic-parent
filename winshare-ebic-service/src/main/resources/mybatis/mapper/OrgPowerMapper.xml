@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.OrgPowerMapper" >
+
+  <sql id="table">tb_org_power</sql>
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.OrgPower" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="org_id" property="orgId" jdbcType="BIGINT" />
+  	<result column="contract_number" property="contractNumber" jdbcType="VARCHAR" />
+  	<result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+  	<result column="teacher_count" property="teacherCount" jdbcType="INTEGER" />
+  	<result column="teacher_free" property="teacherFree" jdbcType="INTEGER" />
+  	<result column="student_count" property="studentCount" jdbcType="INTEGER" />
+  	<result column="student_free" property="studentFree" jdbcType="INTEGER" />
+  	<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    <result column="account_id" property="accountId" jdbcType="BIGINT" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="login_name" property="creatorName" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+   </resultMap>
+  
+  <select id="getById" resultMap="BaseResultMap">
+	  	select a.id,a.org_id,a.contract_number,a.end_time,a.teacher_count,a.teacher_free,a.student_count,a.student_free,a.remarks,a.create_time,a.account_id,b.org_name,c.login_name
+		from tb_org_power a left join tb_org_info b  on a.org_id = b.id  left join  tb_account_info c on a.account_id = c.id  where a.id = #{id}  
+  </select>
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.OrgPower"  resultMap="BaseResultMap" >
+      select a.id,a.org_id,a.contract_number,a.end_time,a.teacher_count,a.teacher_free,a.student_count,a.student_free,a.remarks,a.create_time,a.account_id,b.org_name,c.login_name,a.status
+		from tb_org_power  a left join tb_org_info b  on a.org_id = b.id  left join  tb_account_info c on a.account_id = c.id 
+		<where>
+		   <if test="orgId !=null "> a.org_id = #{orgId}</if>
+		</where>
+  </select>
+ 
+   <select id="findOverdueList" parameterType="com.winshare.edu.modules.system.entity.OrgPower"  resultType="map" >
+      select a.id orgId,b.id orgPowerId
+		from  tb_org_info a, tb_org_power b
+		where b.end_time &lt; #{endTime}  and b.org_id = a.id
+  </select>
+ 
+  <insert id="save" parameterType="com.winshare.edu.modules.system.entity.OrgPower">
+     insert into tb_org_power(org_id,contract_number,end_time,teacher_count,teacher_free,student_count,student_free,remarks,create_time,modify_time,account_id,status)
+     select #{orgId},#{contractNumber},#{endTime},#{teacherCount},#{teacherFree},#{studentCount},#{studentFree},#{remarks},now(),now(),#{accountId},#{status} from dual where (select a2.countNum from (select count(a.id) countNum from tb_org_power a where a.org_id = #{orgId} and  a.status = 1 ) a2 ) = 0 
+  </insert>
+ 
+  <update id="update" parameterType="com.winshare.edu.modules.system.entity.OrgPower">
+    update tb_org_power set org_id = #{orgId},contract_number = #{contractNumber},end_time = #{endTime},teacher_count = #{teacherCount},teacher_free = #{teacherFree},
+    student_count = #{studentCount},student_free = #{studentFree},remarks = #{remarks},modify_time = now(),account_id = #{accountId},status = #{status} where id = #{id} and (select a2.countNum from (select count(a.id) countNum from tb_org_power a where a.org_id = #{orgId} and  a.status = 1 and a.id !=#{id}) a2 ) = 0 
+  </update>
+ 
+ <select id="countContractNumber" parameterType="com.winshare.edu.modules.system.entity.OrgPower" resultType="int">
+         select count(id) from tb_org_power where contract_number = #{contractNumber} 
+         <if test=" id !=null "> and id != #{id} </if>
+ </select>
+ 
+  <update id="updateStatus" parameterType="map">
+     update tb_org_power set status = #{status} where id in
+      <foreach collection="idList" index="index" item="id" open="(" separator="," close=")">
+                #{id}       
+      </foreach>
+  </update>
+ 
+</mapper>

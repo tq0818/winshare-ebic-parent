@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.AreaInfoMapper" >
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.AreaInfo" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="parent_ids" property="parentIds" jdbcType="VARCHAR" />
+  	<result column="name" property="name" jdbcType="VARCHAR" />
+  	<result column="full_name" property="fullName" jdbcType="VARCHAR" />
+  	<result column="code" property="code" jdbcType="VARCHAR" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  	<association property="parent" javaType="com.winshare.edu.modules.system.entity.AreaInfo">
+  		<id column="parent_id" property="id" jdbcType="BIGINT" />
+  		<result column="parent_name" property="name" jdbcType="VARCHAR" />
+  	</association>
+  </resultMap>
+  
+  <select id="getById" resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.name,a.full_name,a.code,a.create_time, a.modify_time,
+	  	b.name parent_name	  	      
+		from tb_area_info a  LEFT JOIN tb_area_info b ON b.id = a.parent_id
+		<where>
+			a.id = #{id}
+		</where>
+  </select>
+  
+ 
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.AreaInfo" resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.name,a.full_name,a.code,a.create_time, a.modify_time,
+	  	b.name parent_name	      
+		from tb_area_info a LEFT JOIN tb_area_info b ON b.id = a.parent_id
+		<where>
+		   	<if test="name != null and name != ''">and a.name like concat('%',#{name},'%')</if>
+			<if test="fullName != null and fullName != ''">and a.full_name = #{fullName}</if>
+			<if test="code != null and code != ''">and a.code = #{code}</if>
+			<if test="(parentIds != null and parentIds != '') or (id != null and id != '') or (parentId != null and parentId != '') ">
+				and ( a.parent_ids like concat('%',#{id},',%') <if test="id !=null ">or a.id = #{id}</if> <if test="parentId !=null ">or a.parent_id = #{id}</if> )
+			</if>
+		</where>
+  </select>
+  
+  
+    <select id="findListByParentId" parameterType="com.winshare.edu.modules.system.entity.AreaInfo" resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.name,a.full_name,a.code,a.create_time, a.modify_time,
+	  	b.name parent_name	      
+		from tb_area_info a LEFT JOIN tb_area_info b ON b.id = a.parent_id where a.parent_id = #{id} or a.id = #{id} or a.parent_ids like concat('%',#{id},',%')
+   </select>
+  
+     <select id="findListByChildrenName" parameterType="com.winshare.edu.modules.system.entity.AreaInfo" resultMap="BaseResultMap">
+	  	select a.id, a.parent_id, a.parent_ids, a.name,a.full_name,a.code,a.create_time, a.modify_time,
+	  	b.name parent_name	      
+		from tb_area_info a LEFT JOIN tb_area_info b ON b.id = a.parent_id
+		<where>
+			( a.parent_ids like concat('%',#{id},',%') <if test="id !=null ">or a.id = #{id}</if> <if test="parentId !=null ">or a.parent_id = #{id}</if> )
+			<if test="name !=null and name !='' ">and a.name like concat('%',#{name},'%') </if>
+		</where>
+   </select>
+  
+  
+  <select id="findTreeInfo" parameterType="com.winshare.edu.modules.system.entity.TreeInfo" resultType="com.winshare.edu.modules.system.entity.TreeInfo">
+	  	SELECT
+			a.id id,
+			a.parent_id parentId,
+			a.parent_ids parentIds,
+			a.name,
+			0 isClass
+		FROM
+			tb_area_info a
+		LEFT JOIN tb_area_info b ON b.id = a.parent_id
+		<where>
+			<if test="orgName != null and orgName != ''">and a.name like concat('%',#{orgName},'%')</if>
+			<if test="parentIds != null and parentIds != ''">and a.parent_ids like concat(#{parentIds},'%')</if>
+		</where>
+  </select>
+  
+  
+  <insert id="save"  parameterType="com.winshare.edu.modules.system.entity.AreaInfo" useGeneratedKeys="true" keyProperty="id">
+  	INSERT INTO tb_area_info (parent_id, parent_ids, name,full_name,code,  create_time, modify_time) 
+  	 select  #{parent.id}, #{parentIds}, #{name}, #{fullName},#{code}, now(), now() from (select count(id) countNum from tb_area_info where code =#{code} having countNum = 0) a2   
+  </insert>
+  
+  <update id="update" parameterType="com.winshare.edu.modules.system.entity.AreaInfo">
+	UPDATE tb_area_info
+	<set>
+		name = #{name},
+		full_name = #{fullName},
+		code= #{code},
+		modify_time = now()
+	</set>
+	<where>
+		id = #{id} and (select a2.countNum from (select count(a.id) countNum from tb_area_info a where code = #{code} and id != #{id} ) a2) = 0
+	</where>
+  </update>
+  
+  <delete id="delete">
+  	DELETE FROM tb_area_info where id = #{id} and (select a2.countNum from (select count(a.id) countNum from tb_area_info a where a.parent_id = #{id}) a2) = 0
+  </delete>
+  
+  <select id="countByCode"  parameterType="com.winshare.edu.modules.system.entity.AreaInfo" resultType="int">
+      select count(id) from tb_area_info where code = #{code}  <if test="id !=null"> and id != #{id} </if>
+  </select>
+</mapper>

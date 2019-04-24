@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.classes.mapper.StudentScoreItemMapper" >
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.classes.entity.StudentScoreItem" >
+
+  </resultMap>
+
+	<sql id="table_columns">
+		id,
+		score_id,
+		item_name,
+		score,
+		book_name,
+		chapter_name,
+		remarks,
+		source,
+		create_time,
+		modify_time
+	</sql>
+
+	<sql id="entity_properties">
+		#{id},
+		#{scoreId},
+		#{itemName},
+		#{score},
+		#{bookName},
+		#{chapterName},
+		#{remarks},
+		#{source},
+		#{createTime},
+		#{modifyTime}
+	</sql>
+
+	<insert id="insert" parameterType="com.winshare.edu.modules.classes.entity.StudentScoreItem" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_student_score_item ( <include refid="table_columns"/> )
+		values (<include refid="entity_properties"/>)
+	</insert>
+
+</mapper>

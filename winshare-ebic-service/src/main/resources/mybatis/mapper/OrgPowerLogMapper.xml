@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.OrgPowerLogMapper" >
+
+  <sql id="table">tb_org_power_log</sql>
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.OrgPowerLog" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="org_id" property="orgId" jdbcType="BIGINT" />
+  	<result column="contract_number" property="contractNumber" jdbcType="VARCHAR" />
+  	<result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+  	<result column="teacher_count" property="teacherCount" jdbcType="INTEGER" />
+  	<result column="teacher_free" property="teacherFree" jdbcType="INTEGER" />
+  	<result column="student_count" property="studentCount" jdbcType="INTEGER" />
+  	<result column="student_free" property="studentFree" jdbcType="INTEGER" />
+  	<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    <result column="account_id" property="accountId" jdbcType="BIGINT" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="login_name" property="creatorName" jdbcType="VARCHAR" />
+    <result column="update_account_id" property="updateAccountId" jdbcType="BIGINT" />
+    <result column="update_account_name" property="updateAccountName" jdbcType="VARCHAR" />
+   </resultMap>
+
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.OrgPower"  resultMap="BaseResultMap" >
+      select a.id,a.org_id,a.contract_number,a.end_time,a.teacher_count,a.teacher_free,a.student_count,a.student_free,a.remarks,a.create_time,a.account_id,b.org_name,c.login_name,a.update_account_id,a.update_account_name,a.modify_time
+		from tb_org_power_log  a left join tb_org_info b  on a.org_id = b.id  left join  tb_account_info c on a.account_id = c.id 
+  </select>
+ 
+  <insert id="save" parameterType="com.winshare.edu.modules.system.entity.OrgPower">
+     insert into tb_org_power_log(org_id,contract_number,end_time,teacher_count,teacher_free,student_count,student_free,remarks,create_time,modify_time,account_id,update_account_id,update_account_name)
+     values(#{orgId},#{contractNumber},#{endTime},#{teacherCount},#{teacherFree},#{studentCount},#{studentFree},#{remarks},#{createTime},now(),#{accountId},#{updateAccountId},#{updateAccountName})
+  </insert>
+ 
+ 
+</mapper>

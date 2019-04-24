@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.classes.mapper.RClassGroupMapper" >
+
+	<sql id="table_columns">
+		id,
+		group_id,
+		student_id
+	</sql>
+
+	<sql id="entity_properties">
+		#{id},
+		#{groupId},
+		#{studentId}
+	</sql>
+
+	<delete id="delete" parameterType="long">
+		delete from tb_r_group_student where group_id = #{id}
+	</delete>
+
+	<insert id="insert" parameterType="com.winshare.edu.modules.classes.entity.RGroupStudent" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_r_group_student( <include refid="table_columns" /> )
+		values ( <include refid="entity_properties" /> )
+	</insert>
+
+	<select id="findStuByGroupId" parameterType="long" resultType="com.winshare.edu.modules.classes.entity.RGroupStudent">
+		select student_id studentId from tb_r_group_student where group_id = #{id}
+	</select>
+</mapper>

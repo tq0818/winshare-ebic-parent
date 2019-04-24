@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.classes.mapper.TeacherCourseMapper">
+
+    <resultMap id="BaseResultMap" type="com.winshare.edu.modules.classes.entity.TeacherCourse">
+
+    </resultMap>
+
+    <sql id="table_columns">
+		id,
+		class_id,
+		teacher_id,
+		subject,
+		teacher_name,
+		teacher_protocol,
+		teacher_ip,
+		teacher_port,
+		grade_name,
+		subject_name,
+		book_name,
+		chapter_name,
+		course_status,
+		create_time
+	</sql>
+
+    <sql id="entity_properties">
+		#{id},
+		#{classId},
+		#{teacherId},
+		#{subject},
+		#{teacherName},
+		#{teacherProtocol},
+		#{teacherIp},
+		#{teacherPort},
+		#{gradeName},
+		#{subjectName},
+		#{bookName},
+		#{chapterName},
+		#{courseStatus},
+		#{createTime}
+	</sql>
+
+    <insert id="insert" parameterType="com.winshare.edu.modules.classes.entity.TeacherCourse" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into tb_teacher_course (
+        <include refid="table_columns"/>
+        )
+        values (<include refid="entity_properties"/>)
+    </insert>
+
+	<update id="update" parameterType="com.winshare.edu.modules.classes.entity.TeacherCourse">
+		UPDATE tb_teacher_course
+		<set>
+			<if test="courseStatus != null and courseStatus != ''">course_status = #{courseStatus}</if>
+		</set>
+		<where>
+			id = #{id}
+		</where>
+	</update>
+
+	<update id="updateTeacherCourse" parameterType="com.winshare.edu.modules.classes.entity.TeacherCourse">
+		update tb_teacher_course
+		<trim prefix="set" suffixOverrides=",">
+			<if test="teacherName != null and teacherName != ''">teacher_name = #{teacherName},</if>
+			<if test="teacherProtocol != null">teacher_protocol = #{teacherProtocol},</if>
+			<if test="teacherIp != null and teacherIp != ''">teacher_ip = #{teacherIp},</if>
+			<if test="teacherPort != null">teacher_port = #{teacherPort},</if>
+			<if test="gradeName != null">grade_name = #{gradeName},</if>
+			<if test="subjcetName != null">subjcet_name = #{subjcetName},</if>
+			<if test="bookName != null">book_name = #{bookName},</if>
+			<if test="chapterName != null">chapter_name = #{chapterName},</if>
+		</trim>
+		<where>id = #{id}</where>
+	</update>
+
+	<select id="findTeacherInfo" parameterType="com.winshare.edu.modules.classes.entity.TeacherCourse" resultType="com.winshare.edu.modules.classes.entity.TeacherCourse">
+		select id courseId,ifnull(course_status,0) courseStatus from tb_teacher_course
+		<where>
+			<if test="classId != null and classId != ''">and class_id = #{classId}</if>
+			<if test="teacherId != null and teacherId != ''">and teacher_id = #{teacherId}</if>
+			<if test="subject != null and subject != ''">and subject = #{subject}</if>
+			<if test="courseStatus != null and courseStatus != ''">and course_status = #{courseStatus}</if>
+		</where>
+	</select>
+
+	<select id="findTeacherInfoByStatus" parameterType="com.winshare.edu.modules.classes.entity.TeacherCourse" resultType="com.winshare.edu.modules.classes.entity.TeacherCourse">
+		select id courseId,ifnull(course_status,0) courseStatus from tb_teacher_course
+		where 1=1 and course_status = 1
+		<if test="classId != null and classId != ''">and class_id = #{classId}</if>
+		<if test="teacherId != null and teacherId != ''">and teacher_id = #{teacherId}</if>
+		<if test="subject != null and subject != ''">and subject = #{subject}</if>
+	</select>
+
+	<select id="stuFindTeacherInfoByStu" parameterType="map" resultType="com.winshare.edu.modules.classes.entity.TeacherCourse">
+		  select tc.id courseId,tc.teacher_protocol teacherProtocol,tc.teacher_ip teacherIp,tc.
+			teacher_port teacherPort,tc.teacher_name teacherName,tc.subject_name subjectName
+			from tb_account_info ai
+			LEFT JOIN tb_r_class_student rcs on ai.id = rcs.student_id
+			LEFT JOIN tb_teacher_course tc on tc.class_id = rcs.class_id
+			where ai.account=#{account} and tc.course_status='1'
+	</select>
+</mapper>

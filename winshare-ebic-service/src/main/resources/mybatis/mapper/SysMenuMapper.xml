@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.SysMenuMapper" >
+  <sql id="table">tb_sys_menu</sql>
+
+  <resultMap id="BaseMenuMap" type="com.winshare.edu.modules.system.entity.SysMenu" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="parent_id" property="parent.id" jdbcType="BIGINT" />
+  	<result column="parent_ids" property="parentIds" jdbcType="VARCHAR" />
+  	<result column="menu_name" property="menuName" jdbcType="VARCHAR" />
+  	<result column="menu_iden" property="menuIden" jdbcType="VARCHAR" />
+  	<result column="menu_icon" property="menuIcon" jdbcType="VARCHAR" />
+  	<result column="menu_sort" property="menuSort" jdbcType="INTEGER" />
+  	<result column="menu_type" property="menuType" jdbcType="VARCHAR" />
+  	<result column="menu_url" property="menuUrl" jdbcType="VARCHAR" />
+  	<result column="display_status" property="displayStatus" jdbcType="VARCHAR" />
+  	<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  	
+  <select id="findMenuByAccountId" parameterType="Long" resultMap="BaseMenuMap">
+  	select  x.id, x.parent_id, x.parent_ids, x.menu_name, x.menu_iden, x.menu_icon, x.menu_sort,
+  	        x.menu_type, x.menu_url, x.display_status	   
+	from tb_r_user_role a,  tb_r_role_menu b, 
+         tb_sys_menu x LEFT JOIN tb_sys_menu y ON y.id = x.parent_id
+	<where>
+	   a.account_id = #{_parameter} and a.role_id = b.role_id and b.menu_id = x.id
+	
+	</where>
+  </select>
+
+ <select id="findMenuTree" resultType="map">
+ SELECT
+			a.id id,
+			a.parent_id pId,
+			a.parent_ids pIds,
+			a.menu_name name
+		FROM
+			tb_sys_menu a
+	
+       
+ </select>
+  
+  
+</mapper>

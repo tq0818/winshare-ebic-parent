@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.TeacherVersionMapper" >
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.TeacherVersion" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="version" property="version" jdbcType="VARCHAR" />
+  	<result column="package_url" property="packageUrl" jdbcType="VARCHAR" />
+  	<result column="exe_url" property="exeUrl" jdbcType="VARCHAR" />
+    <result column="version_sort" property="versionSort" jdbcType="BIGINT" />
+	<result column="is_force" property="isForce" jdbcType="VARCHAR" />
+    <result column="descript" property="descript" jdbcType="VARCHAR" />
+ </resultMap>
+ 
+  
+ 
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.system.entity.TeacherVersion" resultMap="BaseResultMap">
+	  	select a.id,a.version,a.package_url,a.exe_url,a.version_sort,a.is_force,a.descript
+		from tb_teacher_version a
+		<where>
+		    <if test="version != null and version != ''"> and a.version like concat('%',#{version},'%')</if>
+		   	<if test="packageUrl != null and packageUrl != ''"> and a.package_url like concat('%',#{packageUrl},'%')</if>
+			<if test="exeUrl != null and exeUrl != ''"> and a.exe_url like concat('%',#{exeUrl},'%') </if>
+		</where>
+  </select>
+  
+  
+  <insert id="add" parameterType="com.winshare.edu.modules.system.entity.TeacherVersion" keyProperty="id" useGeneratedKeys="true">
+     insert into tb_teacher_version(version,package_url,exe_url,version_sort,is_force,descript) values(#{version},#{packageUrl},#{exeUrl},#{versionSort},#{isForce},#{descript})
+  </insert>
+ 
+ <select id="get" parameterType="long" resultMap="BaseResultMap">
+ 	select a.id,a.version,a.package_url,a.exe_url,a.version_sort,a.is_force,a.descript
+	from tb_teacher_version a where id = #{id}
+ </select>
+ 
+ <update id="update" parameterType="com.winshare.edu.modules.system.entity.TeacherVersion">
+    update tb_teacher_version set version = #{version},package_url = #{packageUrl},exe_url = #{exeUrl},version_sort = #{versionSort},is_force = #{isForce},descript = #{descript} where id = #{id}
+ </update>
+  
+  <delete id="del" parameterType="java.util.List">
+    delete from tb_teacher_version where id in
+    <foreach collection="list" item="item" index="index"  open="(" separator="," close=")">  
+         #{item}
+     </foreach>
+  </delete>
+  
+</mapper>

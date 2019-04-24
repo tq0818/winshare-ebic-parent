@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.AccountInfoMapper">
+
+    <sql id="table">tb_account_info</sql>
+
+    <resultMap id="BaseResultMap" type="com.winshare.edu.modules.system.entity.AccountInfo">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="teacherId" property="teacherId" jdbcType="BIGINT"/>
+        <result column="teacherName" property="teacherName" jdbcType="VARCHAR"/>
+        <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+        <result column="orgId" property="orgId" jdbcType="BIGINT"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="login_name" property="loginName" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="VARCHAR"/>
+        <result column="birth_date" property="birthDate" jdbcType="DATE"/>
+        <result column="account_status" property="accountStatus" jdbcType="VARCHAR"/>
+        <result column="account_type" property="accountType" jdbcType="VARCHAR"/>
+        <result column="login_last_time" property="loginLastTime" jdbcType="INTEGER"/>
+        <result column="login_count" property="loginCount" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <result column="area_id" property="areaId" jdbcType="BIGINT"/>
+        <association property="orgInfo" javaType="com.winshare.edu.modules.system.entity.OrgInfo">
+            <id column="org_id" property="id" jdbcType="BIGINT"/>
+            <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+        </association>
+    </resultMap>
+
+    <select id="findByLoginName" resultMap="BaseResultMap">
+        select a.id, a.org_id, a.account,a.password, a.login_name, a.name, a.account_status, a.login_last_time,
+        a.login_count, a.create_time, a.modify_time,b.org_name
+        from tb_account_info a inner join tb_org_info b on a.org_id = b.id and b.org_status = 1
+        <where>
+            a.account = #{loginName} or a.login_name = #{loginName}
+        </where>
+    </select>
+
+    <select id="get" resultMap="BaseResultMap">
+        select a.id, a.org_id, a.account,a.password, a.login_name, a.name, a.sex, a.birth_date, a.account_status,
+        a.login_last_time,
+        a.login_count, a.create_time, a.modify_time,a.area_id,
+        b.org_name
+        from tb_account_info a, tb_org_info b
+        <where>
+            a.id = #{id} and a.org_id = b.id and b.org_status = 1
+        </where>
+    </select>
+
+    <select id="getByExample" parameterType="com.winshare.edu.modules.system.entity.AccountInfo"
+            resultMap="BaseResultMap">
+        select
+        a.account_status accountStatus,
+        b.id orgId,
+        b.org_name orgName,
+        c.id teacherId,
+        a.account,
+        a.login_name,
+        c.NAME teacherName,
+        c.sex,
+        c.birth_date,
+        a.account_status,
+        a.login_last_time,
+        a.login_count,
+        a. PASSWORD,
+        b.org_name from tb_account_info a
+        INNER JOIN tb_org_info b on a.org_id = b.id
+        INNER JOIN tb_teacher_info c on c.account_id = a.id
+        where b.org_status = 1
+        <if test="id != null and id != ''">and a.id = #{id}</if>
+        <if test="loginName != null and loginName != ''">and a.login_name = #{loginName}</if>
+        <if test="account != null and account != ''">and a.account = #{account}</if>
+        <if test="keyword != null and keyword != ''">and (a.account = #{keyword} or a.login_name = #{keyword})</if>
+
+        limit 1
+    </select>
+
+    <select id="findList" resultMap="BaseResultMap">
+        select a.id, a.org_id, a.account, a.login_name, a.name, a.account_status, a.login_last_time,
+        a.login_count, a.create_time, a.modify_time,
+        b.org_name
+        from tb_account_info a, tb_org_info b
+        <where>
+            a.org_id = b.id and b.org_status = 1
+            <if test="orgInfo != null and orgInfo.id !=null">and (a.org_id = #{orgInfo.id} or b.parent_ids like
+                concat('%',#{orgInfo.id},',%'))
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (a.account like concat('%',#{keyword},'%') or a.login_name like concat('%',#{keyword},'%') or
+                a.name like concat('%',#{keyword},'%') or b.org_name like concat('%',#{keyword},'%'))
+            </if>
+            <if test="accountType != null and accountType != ''">and a.account_type = #{accountType}</if>
+            <if test="accountStatus != null and accountStatus != ''">and a.account_status = #{accountStatus}</if>
+        </where>
+        order by a.create_time desc
+    </select>
+
+    <insert id="save" parameterType="com.winshare.edu.modules.system.entity.AccountInfo" useGeneratedKeys="true"
+            keyProperty="id">
+  	INSERT INTO tb_account_info (org_id, account, password, login_name, name, sex, birth_date, account_status, account_type, login_last_time, login_count, create_time, modify_time,area_id) 
+  	     select #{orgInfo.id}, (select case  when  #{account}='s' or #{account} = 't' then (select concat(#{account},#{orgInfo.orgNumber},concat(left('0000',4-length(max(a2.id) + 1)),max(a2.id) + 1)) from tb_account_info a2) else #{account} end from dual), #{password}, (select case  when  #{loginName} is null or #{loginName} = '' then (select concat(#{account},#{orgInfo.orgNumber},concat(left('0000',4-length(max(a2.id) + 1)),max(a2.id) + 1)) from tb_account_info a2) else #{loginName} end from dual), #{name}, #{sex}, #{birthDate}, #{accountStatus}, #{accountType}, #{loginLastTime},  0, now(), now(),#{areaId} from (select count(a.id) countNum from tb_account_info a where a.account = #{loginName} or a.login_name = #{loginName} having countNum = 0) aa 
+  </insert>
+
+    <update id="update" parameterType="com.winshare.edu.modules.system.entity.AccountInfo">
+        UPDATE tb_account_info
+        <set>
+            org_id = #{orgInfo.id},
+            login_name = #{loginName},
+            name = #{name},
+            sex = #{sex},
+            birth_date = #{birthDate},
+            account_type = #{accountType},
+            modify_time = now(),
+            area_id = #{areaId},
+            password = #{password}
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+    <update id="resetPassword">
+        UPDATE tb_account_info
+        <set>
+            password = md5(concat(account,#{defaultPassword})),
+            modify_time = now()
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+    <update id="updateStatus">
+        UPDATE tb_account_info
+        <set>
+            account_status = #{status},
+            modify_time = now()
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+    <update id="increaseLoginCount">
+        UPDATE tb_account_info
+        <set>
+            login_count = ifnull(login_count,0)+1,
+            login_last_time = now(),
+            modify_time = now()
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+    <delete id="delete">
+  	DELETE FROM tb_account_info where id = #{id}
+  </delete>
+
+    <select id="getAccountExists" parameterType="com.winshare.edu.modules.system.entity.AccountInfo"
+            resultType="com.winshare.edu.modules.system.entity.AccountInfo">
+      select a.id, a.org_id, a.account, a.login_name, a.name, a.account_status,  a.login_last_time,
+	  	       a.login_count, a.create_time, a.modify_time,
+	  	       b.org_name
+	  	from tb_account_info a, tb_org_info b where (a.account = #{loginName} or a.login_name = #{loginName}) and a.password = #{password} and a.org_id = b.id and b.org_status = 1
+  </select>
+
+    <update id="updateLoginInfo" parameterType="com.winshare.edu.modules.system.entity.AccountInfo">
+        update tb_account_info a2
+        <trim prefix="set" prefixOverrides=",">
+            <if test="loginName != null and loginName != '' ">a2.login_name = #{loginName}</if>
+            <if test="password !=null and password !='' and newPassword !=null and newPassword !=''">, a2.password =
+                #{newPassword}
+            </if>
+        </trim>
+        where a2.id = #{id}
+        <if test="password !=null and password !='' ">and a2.password = #{password}</if>
+        <if test="loginName !=null and loginName !='' ">
+            and (select a3.countNum from (select count(a.id) countNum from tb_account_info a where (a.account =
+            #{loginName} or a.login_name = #{loginName}) and a.id != #{id}) a3) = 0
+        </if>
+    </update>
+
+    <update id="updateStatusByClassId">
+        UPDATE tb_account_info a , tb_r_class_student b, tb_student_info c
+        <set>
+            a.account_status = #{param2}
+
+        </set>
+        where b.class_id = #{param1} and b.student_id = c.id and c.account_id = a.id
+    </update>
+
+    <update id="updateStatusByStuId">
+        UPDATE tb_account_info a, tb_student_info b
+        <set>
+            a.account_status = #{param2}
+
+        </set>
+        where b.id in
+        <foreach collection="param1" index="index" item="stuId" open="(" separator="," close=")">
+            ${stuId}
+        </foreach>
+        and a.id = b.account_id
+
+    </update>
+
+
+    <delete id="deleteByStuId" parameterType="long">
+      	DELETE FROM tb_account_info a where a.id = ( select b.id from tb_account_info b ,tb_student_info c where c.id = #{id} and c.account_id = b.id )
+  </delete>
+
+    <delete id="deleteByTeaId" parameterType="long">
+        DELETE FROM tb_account_info a where a.id = ( select b.id from tb_account_info b ,tb_teacher_info c where c.id = #{id} and c.account_id = b.id )
+     
+  </delete>
+
+    <delete id="deleteRUserByAccountId" parameterType="long">
+        DELETE FROM tb_r_user_role where account_id = #{id}
+  </delete>
+
+</mapper>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.classes.mapper.ClassInfoMapper" >
+
+  <sql id="table">tb_class_info</sql>
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.classes.entity.ClassInfo" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	
+  	<result column="org_id" property="orgId" jdbcType="BIGINT" />
+  	<result column="study_section" property="studySection" jdbcType="VARCHAR" />
+  	<result column="class_year" property="classYear" jdbcType="VARCHAR" />
+  	<result column="class_name" property="className" jdbcType="VARCHAR" />
+  	<result column="class_code" property="classCode" jdbcType="VARCHAR" />
+  	<result column="class_status" property="classStatus" jdbcType="VARCHAR" />
+  	<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+  	
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	
+	<association property="orgInfo" javaType="com.winshare.edu.modules.system.entity.OrgInfo">
+		<id column="orgId" property="id" jdbcType="BIGINT" />
+  	
+	  	<result column="org_name" property="orgName" jdbcType="VARCHAR" />
+	  	<result column="org_code" property="orgCode" jdbcType="VARCHAR" />
+	  	<result column="org_level" property="orgLevel" jdbcType="VARCHAR" />
+	</association>
+  </resultMap>
+  
+  <!-- 班级信息分页查询 -->
+  <select id="pageList" parameterType="com.winshare.edu.modules.classes.entity.ClassInfo" resultMap="BaseResultMap">
+  	SELECT
+		c.*, o.id orgId,
+		o.org_name,
+		o.org_code,
+		o.org_level
+	FROM
+		tb_class_info c,
+		tb_org_info o
+	WHERE
+		c.org_id = o.id
+  	 <if test="orgId != null and orgId != ''">
+  	   and (org_id = #{orgId} or parent_ids like concat('%',#{orgId},'%'))
+  	 </if>
+  	 <if test="className != null and className != ''">
+  	   and class_name like concat('%', #{className}, '%')
+  	 </if>
+  	 <if test="classYear != null and classYear != ''">
+  	   and class_year = #{classYear}
+  	 </if>
+  	 <if test="studySection != null and studySection != ''">
+  	   and study_section = #{studySection}
+  	 </if>
+  	 <if test="classStatus != null and classStatus != ''">
+  	   and class_status = #{classStatus}
+  	 </if>
+  	 order by c.create_time desc
+  </select>
+  
+  <!-- 查询机构下启用的班级信息 -->
+  <select id="orgClasses" parameterType="java.lang.Long" resultMap="BaseResultMap">
+  	select * from tb_class_info where class_status = 1 and org_id = #{orgId}
+  </select>
+  
+  <select id="orgClassesEscapeUid"  resultMap="BaseResultMap">
+  	select * from tb_class_info where class_status = 1 and org_id = #{orgId}
+  	and id not in(select class_id from tb_r_class_teacher where teacher_id = #{uid})
+  </select>
+  
+  <select id="getByClassId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+  	select * from tb_class_info where id = #{classId}
+  </select>
+  
+  <insert id="insert" parameterType="com.winshare.edu.modules.classes.entity.ClassInfo">
+  	insert into tb_class_info(org_id, study_section, class_year, class_name, class_code, class_status,remarks, create_time)
+  	values(#{orgId},#{studySection},#{classYear},#{className},#{classCode}, 1,#{remarks}, now());
+  </insert>
+  
+  <update id="update" parameterType="com.winshare.edu.modules.classes.entity.ClassInfo">
+  	update tb_class_info set
+  	       class_name = #{className},
+  	       remarks = #{remarks},
+  	       modify_time = now()
+  	 where id = #{id}
+  </update>
+  
+  <update id="changeStatus" parameterType="com.winshare.edu.modules.classes.entity.ClassInfo">
+  	update tb_class_info set
+  	       class_status = #{classStatus}
+  	 where id = #{id}
+  </update>
+  
+  
+  
+  <select id="getByOrgId"  resultType="com.winshare.edu.modules.system.entity.TreeInfo">
+	SELECT
+		t.id id,
+		t.org_id parentId,
+		t.class_name orgName,
+		1 isClass,
+		t.id cId
+	FROM
+		tb_class_info t
+  </select>
+  
+  <select id="getOtherClasses" parameterType="com.winshare.edu.modules.classes.entity.ClassInfo" resultMap="BaseResultMap">
+  	select * from tb_class_info where class_status = 1 and org_id = #{orgId} and id != #{id}
+  </select>
+  
+  <delete id="deleteClass" parameterType="long">
+      delete from tb_class_info where id = #{id} and (select count(a.student_id) countNum from tb_r_class_student a where a.class_id = #{id}) = 0
+  </delete>
+</mapper>

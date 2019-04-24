@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.teachersMgm.mapper.TeacherMgmMapper">
+
+    <sql id="table">tb_teacher_info</sql>
+
+    <resultMap id="teacherMgmMap" type="com.winshare.edu.modules.teachersMgm.entity.Teacher">
+        <id column="id" property="userId" jdbcType="BIGINT"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="login_name" property="loginName" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+        <result column="account_status" property="accStatus" jdbcType="VARCHAR"/>
+        <result column="org_id" property="orgId" jdbcType="BIGINT"/>
+        <result column="account_id" property="accountId" jdbcType="BIGINT"/>
+        <result column="subjectId" property="subjectId" jdbcType="VARCHAR"/>
+        <result column="subjectName" property="subjectName" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <result column="sex" property="sex" jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+
+    <select id="getById" resultMap="teacherMgmMap">
+        SELECT
+        t2.login_name loginName,
+        t1. NAME NAME,
+        t1.sex sex,
+        t1.birth_date birthDate,
+        t1.phone phone,
+        t1.email email,
+        t1.account_id accountId
+        FROM
+        tb_teacher_info t1
+        LEFT JOIN tb_account_info t2 ON t1.account_id = t2.id , tb_org_info t3
+        <where>
+            t1.id = #{userId} and t3.org_status = 1
+        </where>
+    </select>
+
+    <select id="findList" parameterType="com.winshare.edu.modules.teachersMgm.entity.Teacher" resultMap="teacherMgmMap">
+        SELECT
+        t1.id userId,
+        t2.account account,
+        t1.account_id accountId,
+        t1.create_time,
+        t1.modify_time,
+        t1.sex,
+        t2.login_name loginName,
+        t1. NAME NAME,
+        t3.org_name orgName,
+        t2.account_status accStatus
+        FROM
+        tb_teacher_info t1
+        LEFT JOIN tb_account_info t2 ON t1.account_id = t2.id
+        inner join tb_org_info t3
+        where t3.org_status = 1
+        <if test="loginName != null and loginName != ''">and t2.login_name like concat('%',#{loginName},'%')</if>
+        <if test="name != null and name != ''">and t1.name like concat('%',#{name},'%')</if>
+        <if test="accStatus != null and accStatus != ''">and t2.account_status = #{accStatus}</if>
+        <if test="sex != null and sex != ''">and t1.sex = #{sex}</if>
+        <if test="accountId !=null">and t2.id = #{accountId}</if>
+
+    </select>
+
+
+    <insert id="saveTeacherInfo" parameterType="com.winshare.edu.modules.teachersMgm.entity.Teacher"
+            useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO tb_teacher_info(
+			account_id,
+			org_id,
+			name,
+			sex,
+			birth_date,
+			phone,
+			email,
+			area_code,
+			create_time,
+			modify_time
+		)
+	     select 
+			#{accountId},
+			#{orgId},
+			#{name},
+			#{sex},
+			#{birthDate},
+			#{phone},
+			#{email},
+			#{areaCode},
+			now(),
+			now()
+			from dual where 
+			(select a.org_status from tb_org_info a where id = #{orgId})
+			and (select b.free from (select if(count(c.id) = 0,2147483647,c.teacher_free) free from tb_org_power c where c.org_id = #{orgId} and c.status = 1 ) b) > (select count(d.id) from tb_teacher_info d where d.org_id = #{orgId})
+			
+  </insert>
+
+
+    <insert id="saveTchRClassInfo" parameterType="java.util.List">
+        INSERT INTO tb_r_class_teacher(class_id, teacher_id)
+        VALUES
+        <foreach collection="entity" item="item" index="index" separator=",">
+            (#{item.id},#{item.userId})
+        </foreach>
+    </insert>
+
+
+    <update id="enableTeacher" parameterType="Long">
+  	update tb_account_info set account_status = '1'
+	where id in (select account_id from tb_teacher_info where id = #{id})
+  </update>
+
+
+    <update id="disableTeacher" parameterType="Long">
+  	update tb_account_info set account_status = '0'
+	where id in
+	   (select account_id from tb_teacher_info where id = #{id})
+   </update>
+
+    <insert id="saveTchRSubject" parameterType="java.util.List">
+        INSERT INTO tb_teacher_subject(teacher_id, subject)
+        VALUES
+        <foreach collection="entity" item="item" index="index" separator=",">
+            (#{item.userId},#{item.text})
+        </foreach>
+    </insert>
+
+    <select id="selectClassByUid" parameterType="Integer"
+            resultType="com.winshare.edu.modules.classes.entity.ClassInfo">
+        SELECT
+        t1.class_id id,
+        t2.class_name className
+        FROM
+        tb_r_class_teacher t1
+        LEFT JOIN tb_class_info t2 ON t1.class_id = t2.id
+        inner join tb_org_info t3,tb_teacher_info t4
+        <where>
+            t1.teacher_id = #{userId} and t1.teacher_id = t4.id and t4.org_id = t3.id and t3.org_status = 1
+        </where>
+    </select>
+
+
+    <update id="updateTeacherInfo" parameterType="com.winshare.edu.modules.teachersMgm.entity.Teacher">
+        UPDATE tb_teacher_info
+        <set>
+            name = #{name},
+            sex= #{sex},
+            birth_date = #{birthDate},
+            phone = #{phone},
+            email = #{email},
+            area_code = #{areaCode},
+            modify_time = now()
+        </set>
+        <where>
+            id = #{userId}
+        </where>
+    </update>
+
+
+    <select id="selectSubjectsByUid" parameterType="Integer" resultMap="teacherMgmMap">
+		 SELECT
+			t1. SUBJECT subjectId,
+			t2.dic_name subjectName
+		FROM
+			tb_teacher_subject t1
+		LEFT JOIN tb_sys_dic t2 ON t1. SUBJECT = t2.dic_value
+		LEFT join tb_sys_dic t3 on t2.parent_id = t3.id
+		WHERE
+			t3.dic_code = 'subject'
+		AND t1.teacher_id = ${userId};
+  </select>
+
+
+    <delete id="deleteTchRClassInfo" parameterType="long">
+  		delete from tb_r_class_teacher where teacher_id = #{userId}
+  </delete>
+
+
+    <delete id="deleteTchRSubject" parameterType="long">
+  		delete from tb_teacher_subject where teacher_id = #{userId}
+  </delete>
+
+    <select id="findSubjectVoByTeacherId" parameterType="Long" resultType="com.winshare.edu.common.entity.SubjectVo">
+    SELECT
+	a.subject ,
+	b.dic_name subjectName
+    FROM
+	tb_teacher_subject a
+	INNER JOIN tb_sys_dic b on a.`subject` = b.dic_value
+    where a.teacher_id = #{id}
+</select>
+
+    <select id="findClassVoByTeacherId" parameterType="Long" resultType="com.winshare.edu.common.entity.ClassVo">
+      select b.id classId, b.class_name className,product from tb_r_class_teacher a, tb_class_info b , tb_org_info c where a.teacher_id = #{id} and a.class_id = b.id and b.org_id = c.id and c.org_status = 1
+  </select>
+
+    <select id="findStudentVoByClassId" parameterType="com.winshare.edu.modules.classes.entity.ClassGroup"
+            resultType="com.winshare.edu.common.entity.StudentVo">
+        select si.id studentId,ai.account,ai.login_name loginAlias,si.name studentName,si.sex,si.card_num cardNum,
+        ifnull(ss.student_score,0) studentScore,si.user_avatar userAvatar from tb_class_info ci
+        INNER JOIN tb_r_class_student rci on rci.class_id = ci.id
+        INNER JOIN tb_student_info si on si.id = rci.student_id
+        INNER JOIN tb_r_class_teacher rct on rct.class_id = ci.id
+        INNER JOIN tb_teacher_subject ts on ts.teacher_id = rct.teacher_id
+        INNER JOIN tb_account_info ai on ai.id = si.account_id
+        LEFT JOIN tb_student_score ss on ss.student_id = si.id
+        where 1=1
+        <if test="classId != null and classId != ''">and ci.id =#{classId}</if>
+        <if test="teacherId != null and teacherId != ''">and rct.teacher_id =#{teacherId}</if>
+        <if test="subject != null and subject != ''">and ts.subject = #{subject}</if>
+        GROUP BY si.id
+    </select>
+
+    <select id="getTempList" parameterType="com.winshare.edu.modules.classes.entity.ClassGroup"
+            resultType="com.winshare.edu.common.entity.StudentVo">
+        SELECT
+        st.id studentId,
+        ai.account account,
+        ai.login_name loginAlias,
+        st.`name` studentName,
+        st.sex,
+        st.user_avatar userAvatar
+        FROM
+        tb_class_info ci
+        INNER JOIN tb_account_info ai ON ci.org_id = ai.org_id
+        INNER JOIN tb_student_temp st ON st.account_id = ai.id
+        WHERE 1=1
+        <if test="classId != null and classId != ''">and ci.id =#{classId}</if>
+    </select>
+
+    <delete id="deleteTeaById" parameterType="long">
+  		delete from tb_teacher_info where id = #{id}
+  </delete>
+</mapper>

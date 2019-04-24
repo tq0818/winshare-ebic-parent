@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.user.mapper.StudentInfoMapper" >
+
+  <sql id="table">tb_student_info</sql>
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.user.entity.StudentInfo" >
+  	<id column="id" property="id" jdbcType="BIGINT" />
+  	<result column="account_id" property="accountId" jdbcType="BIGINT" />
+  	<result column="account" property="account" jdbcType="VARCHAR" />
+  	<result column="loginName" property="loginName" jdbcType="VARCHAR" />
+  	<result column="org_id" property="orgId" jdbcType="BIGINT" />
+  	<result column="cId" property="cId" jdbcType="BIGINT" />
+  	<result column="orgName" property="orgName" jdbcType="VARCHAR" />
+  	<result column="className" property="className" jdbcType="VARCHAR" />
+	  <result column="classId" property="classId" jdbcType="VARCHAR" />
+  	<result column="name" property="name" jdbcType="VARCHAR" />
+  	<result column="student_no" property="studentNo" jdbcType="VARCHAR" />
+  	<result column="sex" property="sex" jdbcType="VARCHAR" />
+  	<result column="birth_date" property="birthDate" jdbcType="VARCHAR" />
+  	<result column="province" property="province" jdbcType="VARCHAR" />
+  	<result column="city" property="city" jdbcType="VARCHAR" />
+  	<result column="area" property="area" jdbcType="VARCHAR" />
+  	<result column="user_avatar" property="userAvatar" jdbcType="VARCHAR" />
+  	<result column="status" property="status" jdbcType="VARCHAR" />
+  	<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+	<result column="area_id" property="areaId" jdbcType="BIGINT" />
+	
+  </resultMap>
+  
+  <select id="listByClassId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+  	select * from tb_student_info s, tb_r_class_student cs ,tb_org_info o where s.id = cs.student_id and cs.class_id = #{classId} and s.org_id = o.id and o.org_status = 1
+  </select>
+  
+  
+  <select id="getById" resultMap="BaseResultMap">
+	  	SELECT
+			t1.id id,
+			t1.account_id accountId,
+			t1.student_no studentNo,
+			t1. NAME NAME,
+			t1.sex sex,
+			t1.birth_date birthDate,
+			t1.province province,
+			t1.city city,
+			t1.area area,
+			t1.user_avatar userAvatar,
+			t1.area_id,
+			t2.login_name loginName,
+			t3.class_id cId
+		FROM
+			tb_student_info t1
+		LEFT JOIN tb_account_info t2 ON t1.account_id = t2.id
+		LEFT JOIN tb_r_class_student t3 ON t1.id = t3.student_id
+		inner join tb_org_info t4
+		where
+		t1.id = #{id}   and t4.org_status = 1
+		
+  </select>
+  
+  
+  <select id="findList" parameterType="com.winshare.edu.modules.user.entity.StudentInfo" resultMap="BaseResultMap">
+	  	SELECT
+	  		t1.id id,
+			t2.account account,
+			t2.login_name loginName,
+			t1. NAME NAME,
+			t1.area_id,
+			t3.org_name orgName,
+			t5.class_name className,
+	  		t5.id classId,
+			t2.account_status STATUS
+		FROM
+			tb_student_info t1
+		LEFT JOIN tb_account_info t2 ON t1.account_id = t2.id
+		LEFT JOIN tb_r_class_student t4 ON t1.id = t4.student_id
+		LEFT JOIN tb_class_info t5 ON t4.class_id = t5.id
+		inner join tb_org_info t3
+		where  t3.org_status = 1
+		<if test="loginName != null and loginName != ''">and t2.login_name like  concat('%',#{loginName},'%')</if>
+		<if test="name != null and name != ''">and t1.name like concat('%',#{name},'%')</if>
+		<if test="status != null and status != ''">and t2.account_status = #{status}</if>
+		<if test="sex != null and sex != ''">and t1.sex = #{sex}</if>
+		<if test="className != null and className != ''">and t5.class_name like concat('%',#{className},'%')</if>
+		<if test="cId != null and cId != ''">and t5.id = #{cId}</if>
+	    <if test="accountId !=null"> and t1.account_id = #{accountId} </if> 
+	    order by t1.create_time desc
+  </select>
+  
+  
+  
+   <insert id="saveStudentInfo"  parameterType="com.winshare.edu.modules.user.entity.StudentInfo" useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO tb_student_info(
+			account_id,
+			org_id,
+			student_no,
+			NAME,
+			sex,
+			birth_date,
+			user_avatar,
+			area_code,
+			create_time,
+			modify_time,
+			area_id
+		)
+
+		VALUES
+			(#{accountId},
+			#{orgId},
+			#{studentNo},
+			#{name},
+			#{sex},
+			#{birthDate},
+			#{userAvatar},
+			#{areaCode},
+			now(),
+			now(),
+			#{areaId});
+  </insert>
+  
+  
+  <update id="updateStudentInfo" parameterType="com.winshare.edu.modules.user.entity.StudentInfo">
+	UPDATE tb_student_info
+	<set>
+		name = #{name},
+		sex= #{sex},
+		birth_date = #{birthDate},
+		user_avatar = #{userAvatar},
+		area_code = #{areaCode},
+		modify_time = now(),
+		area_id = #{areaId}
+	</set>
+	<where>
+		id = #{id}
+	</where>
+  </update>
+  
+  
+  <delete id="deleteClsRStu">
+  	delete from tb_r_class_student where student_id = #{id}
+  </delete>
+  
+   <insert id="insertClsRStu"  parameterType="com.winshare.edu.modules.user.entity.StudentInfo" useGeneratedKeys="true" keyProperty="id" >
+		insert into tb_r_class_student(class_id,student_id)
+		VALUES
+			(#{cId},
+			#{id});
+  </insert>
+  
+  
+  <update id="enableStudent" parameterType="java.util.List">
+  	update tb_account_info set account_status = '1'
+	where id in
+  	<foreach collection="ids" item="item" index="index" separator="," >  
+       	(#{item})  
+  	</foreach>
+  </update>
+  
+  
+   <update id="disableStudent" parameterType="java.util.List">
+  	update tb_account_info set account_status = '0'
+	where id in
+  	<foreach collection="ids" item="item" index="index" separator="," >  
+       	(#{item})  
+  	</foreach>
+   </update>
+   
+   
+  <delete id="deleteStuById" parameterType="long">
+  	delete from tb_student_info where id = #{id}
+  </delete>
+</mapper>

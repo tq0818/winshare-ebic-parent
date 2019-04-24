@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.BooksCatalogMapper" >
+
+    <select id="findByBookId" parameterType="int" resultType="com.winshare.edu.modules.system.entity.BooksCatalogInfo">
+        select id,book_id bookId, name, parent_id parentId from tb_books_catalog where book_id = #{id} and `level` = 0
+    </select>
+
+    <select id="findKnowledge" parameterType="int" resultType="com.winshare.edu.modules.system.entity.BooksCatalogInfo">
+        select id,book_id bookId, name, parent_id parentId from tb_books_catalog where book_id = #{id} and `level` = 1
+    </select>
+
+    <select id="findByBook" parameterType="int" resultType="com.winshare.edu.modules.system.entity.BooksCatalogInfo">
+        select id,book_id bookId, name, parent_id parentId from tb_books_catalog where book_id = #{id}
+    </select>
+
+</mapper>

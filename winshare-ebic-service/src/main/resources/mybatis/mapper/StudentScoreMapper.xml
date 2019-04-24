@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.classes.mapper.StudentScoreMapper" >
+
+  <resultMap id="BaseResultMap" type="com.winshare.edu.modules.classes.entity.StudentScore" >
+
+  </resultMap>
+
+	<sql id="table_columns">
+		id,
+		student_id,
+		teacher_id,
+		grade,
+		subject,
+		student_score,
+		create_time,
+		modify_time
+	</sql>
+
+	<sql id="entity_properties">
+		#{id},
+		#{studentId},
+		#{teacherId},
+		#{grade},
+		#{subject},
+		#{studentScore},
+		#{createTime},
+		#{modifyTime}
+	</sql>
+
+	<insert id="insert" parameterType="com.winshare.edu.modules.classes.entity.StudentScore" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_student_score ( <include refid="table_columns"/> )
+		values (<include refid="entity_properties"/>)
+	</insert>
+
+	<update id="update" parameterType="com.winshare.edu.modules.classes.entity.StudentScore">
+		update tb_student_score
+		<set>
+			student_score = #{studentScore}
+		</set>
+		<where>
+			id =#{id}
+		</where>
+	</update>
+
+	<select id="findSutdent" parameterType="com.winshare.edu.modules.classes.entity.StudentScore" resultType="com.winshare.edu.modules.classes.entity.StudentScore">
+		  select id,student_id studentId,teacher_id teacherId,ifnull(student_score,0) studentScore from tb_student_score
+		  <where>
+			  <if test="studentId != null and studentId != ''">and student_id = #{studentId}</if>
+			  <if test="teacherId != null and teacherId != ''">and teacher_id = #{teacherId}</if>
+			  <if test="grade != null and grade != ''">and grade = #{grade}</if>
+			  <if test="subject != null and subject != ''">and subject = #{subject}</if>
+		  </where>
+	</select>
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winshare.edu.modules.system.mapper.BookMapper" >
+
+    <select id="findList" parameterType="com.winshare.edu.modules.system.entity.BookInfo" resultType="com.winshare.edu.modules.system.entity.BookInfo">
+        select id,name,phase_name phaseName,subject_name subjectName,grade_name gradeName ,publisher_name publisherName,
+        fascicule_name fasciculeName,version,version_name versionName,is_recommend isRecommend,s_delete sDelete
+        from tb_books_info
+        <where>
+            <if test="name != null and name != ''"> and name like concat('%',#{name},'%')</if>
+        </where>
+    </select>
+
+    <select id="findBookList" parameterType="com.winshare.edu.modules.system.entity.BookInfo" resultType="com.winshare.edu.modules.system.entity.BookInfo">
+        select id,name,grade_name gradeName,subject_name subjectName,fascicule_name fasciculeName,version_name versionName,
+        publisher_name publisherName,phase_name phaseName,file_path filePath
+        from tb_books_info
+        <where>
+            <if test="name != null and name != ''"> and name like concat('%',#{name},'%')</if>
+            <if test="subjectCode != null and subjectCode != ''"> and subject_code = #{subjectCode})</if>
+            <if test="publisherCode != null and publisherCode != ''"> and publisher_code = #{publisherCode})</if>
+            <if test="gradeCode != null and gradeCode != ''"> and grade_code = #{gradeCode})</if>
+        </where>
+    </select>
+
+
+    <insert id="add" parameterType="com.winshare.edu.modules.system.entity.BookInfo" keyProperty="id" useGeneratedKeys="true">
+        insert into tb_books_info(name,subject_name,grade_name,publisher_name,fascicule_name,file_path,modify_time,create_time,s_delete,subject_code,fascicule_code,publisher_code,s_operator_name,s_operator_account,file_id)
+        values(#{name},#{subjectName},#{gradeName},#{publisherName},#{fasciculeName},#{filePath},now(),now(),1,#{subjectCode},#{fasciculeCode},#{publisherCode},#{sOperatorName},#{sOperatorAccount},#{fileId})
+    </insert>
+
+    <select id="findById" parameterType="com.winshare.edu.modules.system.entity.BookInfo" resultType="com.winshare.edu.modules.system.entity.BookInfo">
+        select id,name,phase_name phaseName,subject_name subjectName,grade_name gradeName ,publisher_name publisherName,file_path filePath,
+        fascicule_name fasciculeName,version,version_name versionName,is_recommend isRecommend,s_delete sDelete
+        from tb_books_info
+        <where>
+            <if test="id != null and id != ''"> and id = #{id}</if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="com.winshare.edu.modules.system.entity.BookInfo">
+        UPDATE tb_books_info
+        <set>
+            name = #{name},
+            file_path= #{filePath},
+            grade_name = #{gradeName},
+            subject_name = #{subjectName},
+            fascicule_name = #{fasciculeName},
+            modify_time = now(),
+            publisher_name = #{publisherName}
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+</mapper>
