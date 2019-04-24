@@ -1,0 +1,49 @@
+.choicebox-panel{
+	padding:0;
+}
+
+.choice-button-panel{
+	text-align: center;
+}
+
+.choicebox-data-list{
+	border:1px solid #ccc;
+	overflow: auto;
+}
+
+.choicebox-header-right, .choicebox-header-left{
+	text-align: left;
+}
+
+.search-panel{
+	padding:0 0 10px 0;
+}
+
+.choicebox-data-list > .item{
+	height: 40px;
+	line-height: 40px;
+	border-bottom: 1px solid #ccc;
+	padding-left: 20px;
+	cursor: pointer;
+}
+.choicebox-data-list > .item:hover{
+	background: rgb(248, 247, 247);
+}
+.choicebox-data-list > .choosed,.choicebox-data-list > .choosed:hover{
+	background: #265AC4;
+	color: #fff;
+}
+
+
+.choice-select-button {
+	top:50%;
+	transform:translateY(-50%);
+	padding: 10px;
+	text-align: center;
+}
+
+.choice-select-button button {
+	width:40px !important;
+	
+	margin: 5px auto !important;
+}

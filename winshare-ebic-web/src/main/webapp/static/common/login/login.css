@@ -1,0 +1,46 @@
+/* CSS Document */
+body {
+  border-top: 5px solid #e2e2e2;
+}
+.top{ width:100%; height:5px; position:fixed; z-index:5; top:0px;}
+.bg{ background:url(images/login_01.jpg) no-repeat center center; width:100%; height:929px; position:fixed; z-index:2; top:50%; margin-top:-533px;}
+.bg2{ background:#e6e6e6; width:100%; height:500px; position:fixed; z-index:1; top:0px;}
+.login{ width:326px; height:373px; background:url(images/login_02.png) no-repeat; position:fixed; z-index:5; left:50%; top:50%; margin-left:63px; margin-top:-233px;}
+.login ul{ padding:90px 33px 0;}
+.login ul .input01{ width:248px; height:30px; border:1px solid #d7d7d7; background:#fff; padding:0 5px; font:14px/30px 微软雅黑; color:#333; margin-bottom:16px;}
+.login ul .input02{ width:80px; height:30px; border:1px solid #d7d7d7; background:#fff; padding:0 5px; font:14px/30px 微软雅黑; color:#333; margin-bottom:16px; margin-right:10px; float:left; display:inline;}
+.login ul p img{ float:left; display:inline;}
+.login ul .input03{
+  width: 258px;
+  height: 44px;
+  border: 1px solid #b51f2d;
+  background: #ec4f5c;
+  font: 20px/44px 微软雅黑;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 16px;
+  border-radius: 5px;
+}
+.login ul p a.a1{ color:#a4a4a4; text-align:right; text-decoration:underline; float:right; display:inline;}
+
+
+
+.banquan{
+  background: #616161;
+  width: 100%;
+  height: 56px;
+  padding-top: 10px;
+  position: fixed;
+  bottom: 0;
+  z-index: 2;
+  text-align: center;
+  border-top: 1px solid #2d2d2d;
+} 
+.banquan p{ font:12px/22px 微软雅黑; color:#fff;}
+.banquan a{ color:#fff; margin:0 20px; text-decoration:none;}
+.banquan a:hover{ text-decoration:underline;}
+
+
+#ewm{ width:128px; height:182px; position:fixed; bottom:40%; left:50%; margin-left:500px; background:url(../images/login_05.png) no-repeat; z-index:10;}
+#ewm a{ width:128px; height:50px; display:block; margin-top:132px;}
